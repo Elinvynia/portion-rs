@@ -3,88 +3,188 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 pub struct Portion;
 
 impl Portion {
-    pub fn open<T: Sized + PartialOrd + Display>(vec: Vec<T>) -> Open<T> {
-        Open {vec}
+    pub fn open<T: Sized + PartialOrd + Display>(lower: T, upper: T) -> Open<T> {
+        Open { lower, upper }
     }
-    pub fn closed<T: Sized + PartialOrd + Display>(vec: Vec<T>) -> Closed<T> {
-        Closed {vec}
+    pub fn closed<T: Sized + PartialOrd + Display>(lower: T, upper: T) -> Closed<T> {
+        Closed { lower, upper }
+    }
+    pub fn empty() -> Empty {
+        Empty
+    }
+    pub fn singleton<T: Sized + PartialOrd + Display>(value: T) -> Singleton<T> {
+        Singleton { value }
+    }
+    pub fn openclosed<T: Sized + PartialOrd + Display>(lower: T, upper: T) -> OpenClosed<T> {
+        OpenClosed { lower, upper }
+    }
+    pub fn closedopen<T: Sized + PartialOrd + Display>(lower: T, upper: T) -> ClosedOpen<T> {
+        ClosedOpen { lower, upper }
     }
 }
 
 trait Interval {
-    fn empty(&self) -> bool {true}
-    fn atomic() -> bool {true}
+    fn empty(&self) -> bool {
+        true
+    }
+    fn atomic(&self) -> bool {
+        true
+    }
+    fn itype(&self) -> IntervalType {
+        IntervalType::Empty
+    }
+}
+
+pub enum IntervalType {
+    Open,
+    Closed,
+    Empty,
+    Singleton,
+    OpenClosed,
+    ClosedOpen,
 }
 
 pub struct Open<T: Sized + PartialOrd + Display> {
-    vec: Vec<T>,
+    lower: T,
+    upper: T,
 }
 
 impl<T: Sized + PartialOrd + Display> Display for Open<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let mut s = String::new();
-        for x in self.vec.iter() {
-            s += &x.to_string();
-            s.push_str(", ")
+        if self.empty() {
+            return write!(f, "()");
         }
 
-        s.truncate(s.len() - 1);
-
-        write!(f, "({})", s)
+        write!(f, "({}, {})", self.lower, self.upper)
     }
 }
 
 impl<T: Sized + PartialOrd + Display> Interval for Open<T> {
     fn empty(&self) -> bool {
-        if self.vec.len() > 2 {
-            return false
-        };
-        if self.vec.len() == 0 {
-            return true
-        };
-        if self.vec.len() == 1 {
-            return false
-        };
-        if self.vec.len() == 2 && self.vec[0] == self.vec[1] {
-            return true
-        };
-        return false
+        self.lower >= self.upper
     }
 
-    fn atomic() -> bool {true}
+    fn atomic(&self) -> bool {
+        true
+    }
+    fn itype(&self) -> IntervalType {
+        IntervalType::Open
+    }
 }
 
 pub struct Closed<T: Sized + PartialOrd + Display> {
-    vec: Vec<T>
+    lower: T,
+    upper: T,
 }
 
 impl<T: Sized + PartialOrd + Display> Display for Closed<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let mut s = String::new();
-        for x in self.vec.iter() {
-            s += &x.to_string();
-            s.push_str(", ")
+        if self.empty() {
+            return write!(f, "()");
         }
 
-        s.truncate(s.len() - 1);
-
-        write!(f, "[{}]", s)
+        if self.lower == self.upper {
+            write!(f, "[{}]", self.lower)
+        } else {
+            write!(f, "[{}, {}]", self.lower, self.upper)
+        }
     }
 }
 
-pub struct OpenClosed;
+impl<T: Sized + PartialOrd + Display> Interval for Closed<T> {
+    fn empty(&self) -> bool {
+        self.lower > self.upper
+    }
 
-impl Display for OpenClosed {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "(]")
+    fn atomic(&self) -> bool {
+        true
+    }
+    fn itype(&self) -> IntervalType {
+        IntervalType::Closed
     }
 }
 
+pub struct Empty;
 
-pub struct ClosedOpen;
+impl Interval for Empty {}
 
-impl Display for ClosedOpen {
+impl Display for Empty {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "[)")
+        write!(f, "()")
+    }
+}
+
+pub struct Singleton<T: Sized + PartialOrd + Display> {
+    value: T,
+}
+
+impl<T: Sized + PartialOrd + Display> Interval for Singleton<T> {
+    fn empty(&self) -> bool {
+        false
+    }
+    fn atomic(&self) -> bool {
+        true
+    }
+    fn itype(&self) -> IntervalType {
+        IntervalType::Singleton
+    }
+}
+
+impl<T: Sized + PartialOrd + Display> Display for Singleton<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "[{}]", self.value)
+    }
+}
+
+pub struct OpenClosed<T: Sized + PartialOrd + Display> {
+    lower: T,
+    upper: T,
+}
+
+impl<T: Sized + PartialOrd + Display> Display for OpenClosed<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        if self.empty() {
+            return write!(f, "(]");
+        }
+        write!(f, "({}, {}]", self.lower, self.upper)
+    }
+}
+
+impl<T: Sized + PartialOrd + Display> Interval for OpenClosed<T> {
+    fn empty(&self) -> bool {
+        self.lower >= self.upper
+    }
+
+    fn atomic(&self) -> bool {
+        true
+    }
+    fn itype(&self) -> IntervalType {
+        IntervalType::OpenClosed
+    }
+}
+
+pub struct ClosedOpen<T: Sized + PartialOrd + Display> {
+    lower: T,
+    upper: T,
+}
+
+impl<T: Sized + PartialOrd + Display> Display for ClosedOpen<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        if self.empty() {
+            return write!(f, "[)");
+        }
+        write!(f, "[{}, {})", self.lower, self.upper)
+    }
+}
+
+impl<T: Sized + PartialOrd + Display> Interval for ClosedOpen<T> {
+    fn empty(&self) -> bool {
+        self.lower >= self.upper
+    }
+    fn atomic(&self) -> bool {
+        true
+    }
+    fn itype(&self) -> IntervalType {
+        IntervalType::ClosedOpen
     }
 }
