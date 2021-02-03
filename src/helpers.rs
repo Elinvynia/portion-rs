@@ -16,6 +16,10 @@ impl<T: ITrait> Interval<T> {
         matches!(self.itype, Closed | ClosedOpen)
     }
 
+    pub(crate) fn right_open(&self) -> bool {
+        matches!(self.itype, Open | ClosedOpen)
+    }
+
     pub(crate) fn right_closed(&self) -> bool {
         matches!(self.itype, Closed | OpenClosed)
     }
@@ -113,24 +117,24 @@ impl<T: ITrait> Interval<T> {
 
     // Gets the highest right point of two intervals.
     pub(crate) fn get_right_val(&self, other: &Interval<T>) -> RightBound<T> {
-        if self.left_open() && other.left_open() {
+        if self.right_open() && other.right_open() {
             let val = (self.upper).max(other.upper);
             return RightBound::Open(val.unwrap());
         }
 
-        if self.left_closed() && other.left_closed() {
+        if self.right_closed() && other.right_closed() {
             let val = (self.upper).max(other.upper);
             return RightBound::Closed(val.unwrap());
         }
 
-        if self.left_closed() && other.left_open() {
+        if self.right_closed() && other.right_open() {
             if self.upper >= other.upper {
                 return RightBound::Closed(self.upper.unwrap());
             }
             return RightBound::Open(other.upper.unwrap());
         }
 
-        if self.left_open() && other.left_closed() {
+        if self.right_open() && other.right_closed() {
             if self.upper > other.upper {
                 return RightBound::Open(self.upper.unwrap());
             }
