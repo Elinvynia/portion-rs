@@ -59,24 +59,24 @@ impl<T: ITrait> Interval<T> {
 
     // Gets the common right point of two intervals.
     pub(crate) fn get_right_bound(&self, other: &Interval<T>) -> RightBound<T> {
-        if self.left_open() && other.left_open() {
+        if self.right_open() && other.right_open() {
             let val = (self.upper).min(other.upper);
             return RightBound::Open(val.unwrap());
         }
 
-        if self.left_closed() && other.left_closed() {
+        if self.right_closed() && other.right_closed() {
             let val = (self.upper).min(other.upper);
             return RightBound::Closed(val.unwrap());
         }
 
-        if self.left_closed() && other.left_open() {
+        if self.right_closed() && other.right_open() {
             if self.upper < other.upper {
                 return RightBound::Open(self.upper.unwrap());
             }
             return RightBound::Closed(other.upper.unwrap());
         }
 
-        if self.left_open() && other.left_closed() {
+        if self.right_open() && other.right_closed() {
             if other.upper < self.upper {
                 return RightBound::Open(other.upper.unwrap());
             }

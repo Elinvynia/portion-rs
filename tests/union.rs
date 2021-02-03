@@ -31,6 +31,10 @@ fn union_singleton() {
     let y = Portion::openclosed(3, 4);
     assert_eq!("[3, 4]", (x | y).to_string());
 
+    let x = Portion::singleton(5);
+    let y = Portion::open(2, 5);
+    assert_eq!("(2, 5]", (x | y).to_string());
+
     let x = Portion::closedopen(2, 8);
     let y = Portion::singleton(4);
     assert_eq!("[2, 8)", (x | y).to_string());

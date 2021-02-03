@@ -135,6 +135,7 @@ impl<T: ITrait> BitOr for Interval<T> {
         }
 
         // TODO: return a union of two intervals?
+        #[allow(clippy::suspicious_operation_groupings)]
         if !self.singleton() && !rhs.singleton() && self.upper < rhs.lower {
             return Portion::empty();
         }
