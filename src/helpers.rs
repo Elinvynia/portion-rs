@@ -1,29 +1,15 @@
 // Helpers used in crate code.
 
-#![allow(dead_code)]
-
 use crate::impls::ITrait;
 use crate::{Interval, IntervalType::*};
 
 impl<T: ITrait> Interval<T> {
-    pub(crate) fn open(&self) -> bool {
-        self.itype == Open
-    }
-
-    pub(crate) fn closed(&self) -> bool {
-        self.itype == Closed
-    }
-
     pub(crate) fn singleton(&self) -> bool {
         self.itype == Singleton
     }
 
     pub(crate) fn left_open(&self) -> bool {
         matches!(self.itype, Open | OpenClosed)
-    }
-
-    pub(crate) fn right_open(&self) -> bool {
-        matches!(self.itype, Open | ClosedOpen)
     }
 
     pub(crate) fn left_closed(&self) -> bool {

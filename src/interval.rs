@@ -1,7 +1,5 @@
 //! Holds the interval type and associated methods.
 
-#![allow(clippy::suspicious_operation_groupings)]
-
 use crate::impls::ITrait;
 use crate::ops::IntervalOps;
 use crate::IntervalType;
