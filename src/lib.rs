@@ -26,7 +26,7 @@ pub(crate) mod impls;
 pub mod interval;
 pub mod ops;
 
-#[derive(Eq, PartialEq, Clone)]
+#[derive(Eq, PartialEq, Copy, Clone)]
 pub(crate) enum IntervalType {
     Open,
     Closed,
