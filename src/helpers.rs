@@ -112,6 +112,31 @@ impl<T: ITrait> Interval<T> {
             return LeftBound::Open(self.lower.unwrap());
         }
 
+        if self.singleton() && other.singleton() {
+            let val = (self.lower).min(other.lower);
+            return LeftBound::Closed(val.unwrap());
+        }
+
+        if self.singleton() {
+            if self.lower <= other.lower {
+                return LeftBound::Closed(self.lower.unwrap());
+            }
+            if other.left_closed() {
+                return LeftBound::Closed(other.lower.unwrap());
+            }
+            return LeftBound::Open(other.lower.unwrap());
+        }
+
+        if other.singleton() {
+            if other.lower <= self.lower {
+                return LeftBound::Closed(other.lower.unwrap());
+            }
+            if self.left_closed() {
+                return LeftBound::Closed(self.lower.unwrap());
+            }
+            return LeftBound::Open(self.lower.unwrap());
+        }
+
         LeftBound::None
     }
 
@@ -139,6 +164,31 @@ impl<T: ITrait> Interval<T> {
                 return RightBound::Open(self.upper.unwrap());
             }
             return RightBound::Closed(other.upper.unwrap());
+        }
+
+        if self.singleton() && other.singleton() {
+            let val = (self.lower).max(other.lower);
+            return RightBound::Closed(val.unwrap());
+        }
+
+        if self.singleton() {
+            if self.lower >= other.upper {
+                return RightBound::Closed(self.lower.unwrap());
+            }
+            if other.right_closed() {
+                return RightBound::Closed(other.upper.unwrap());
+            }
+            return RightBound::Open(other.upper.unwrap());
+        }
+
+        if other.singleton() {
+            if other.lower >= self.upper {
+                return RightBound::Closed(other.lower.unwrap());
+            }
+            if self.right_closed() {
+                return RightBound::Closed(self.upper.unwrap());
+            }
+            return RightBound::Open(self.upper.unwrap());
         }
 
         RightBound::None

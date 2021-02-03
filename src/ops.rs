@@ -87,6 +87,7 @@ impl<T: ITrait> BitAnd for Interval<T> {
                 return Portion::empty();
             }
         }
+
         if rhs.singleton() {
             if self.contains(rhs.lower.unwrap()) {
                 return rhs;
@@ -134,7 +135,7 @@ impl<T: ITrait> BitOr for Interval<T> {
         }
 
         // TODO: return a union of two intervals?
-        if self.upper < rhs.lower {
+        if !self.singleton() && !rhs.singleton() && self.upper < rhs.lower {
             return Portion::empty();
         }
 
