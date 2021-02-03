@@ -164,11 +164,21 @@ impl<T: ITrait> Neg for Interval<T> {
     fn neg(self) -> Self::Output {
         let left_lower = self.lower.unwrap().minn();
         let left_upper = self.lower.unwrap();
-        let left = Portion::closedopen(left_lower, left_upper);
+        let left;
+        if self.left_closed() {
+            left = Portion::closedopen(left_lower, left_upper);
+        } else {
+            left = Portion::closed(left_lower, left_upper);
+        }
 
         let right_lower = self.upper.unwrap();
         let right_upper = self.upper.unwrap().maxx();
-        let right = Portion::openclosed(right_lower, right_upper);
+        let right;
+        if self.right_closed() {
+            right = Portion::openclosed(right_lower, right_upper);
+        } else {
+            right = Portion::closed(right_lower, right_upper)
+        }
 
         Intervals::new(vec![left, right])
     }
