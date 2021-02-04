@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-pub trait ITrait: Sized + Ord + Copy + Display {
+pub trait Item: Sized + Ord + Copy + Display {
     fn next(self) -> Self {
         unimplemented!()
     }
@@ -9,11 +9,11 @@ pub trait ITrait: Sized + Ord + Copy + Display {
         unimplemented!()
     }
 
-    fn minn(self) -> Self {
+    fn minimum(self) -> Self {
         unimplemented!()
     }
 
-    fn maxx(self) -> Self {
+    fn maximum(self) -> Self {
         unimplemented!()
     }
 }
@@ -29,15 +29,15 @@ macro_rules! impl_num {
                 self - 1
             }
 
-            fn minn(self) -> Self {
+            fn minimum(self) -> Self {
                 <$t>::MIN
             }
 
-            fn maxx(self) -> Self {
+            fn maximum(self) -> Self {
                 <$t>::MAX
             }
         }
     )*)
 }
 
-impl_num!(ITrait for usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128);
+impl_num!(Item for usize u8 u16 u32 u64 u128 isize i8 i16 i32 i64 i128);

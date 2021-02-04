@@ -1,18 +1,18 @@
 //! Operations defined on intervals.
 
 use crate::helpers::{LeftBound, RightBound};
-use crate::holder::Intervals;
-use crate::impls::ITrait;
+use crate::impls::Item;
+use crate::intervals::Intervals;
 use crate::{Interval, IntervalType, Portion};
 use std::ops::{BitAnd, BitOr, Neg};
 
 /// Operations defined on intervals.
-pub trait IntervalOps: Sized {
+pub trait Operations: Sized {
     /// The interval type used in implementations.
-    type Interval;
+    type Single;
 
     /// Type for returning multiple intervals.
-    type Intervals;
+    type Multiple;
 
     /// Returns whether the interval(s) is empty, regardless of it's actual type.
     fn empty(&self) -> bool {
@@ -25,24 +25,24 @@ pub trait IntervalOps: Sized {
     }
 
     /// Returns the intersection of two intervals, shorthand for `interval & interval`.
-    fn intersection(self, _other: Self::Interval) -> Self::Interval {
+    fn intersection(self, _other: Self::Single) -> Self::Single {
         unimplemented!()
     }
 
     /// Returns the union of two intervals, shorthand for `interval | interval`.
-    fn union(self, _other: Self::Interval) -> Self::Interval {
+    fn union(self, _other: Self::Single) -> Self::Single {
         unimplemented!()
     }
 
     /// Returns the complement of the interval, shorthand for `-interval`
-    fn complement(self) -> Self::Intervals {
+    fn complement(self) -> Self::Multiple {
         unimplemented!()
     }
 }
 
-impl<T: ITrait> IntervalOps for Interval<T> {
-    type Interval = Self;
-    type Intervals = Intervals<T>;
+impl<T: Item> Operations for Interval<T> {
+    type Single = Self;
+    type Multiple = Intervals<T>;
 
     fn empty(&self) -> bool {
         use IntervalType::*;
@@ -56,21 +56,21 @@ impl<T: ITrait> IntervalOps for Interval<T> {
         }
     }
 
-    fn intersection(self, other: Self::Interval) -> Self::Interval {
+    fn intersection(self, other: Self::Single) -> Self::Single {
         self & other
     }
 
-    fn union(self, other: Self::Interval) -> Self::Interval {
+    fn union(self, other: Self::Single) -> Self::Single {
         self | other
     }
 
-    fn complement(self) -> Self::Intervals {
+    fn complement(self) -> Self::Multiple {
         -self
     }
 }
 
 // Intersection.
-impl<T: ITrait> BitAnd for Interval<T> {
+impl<T: Item> BitAnd for Interval<T> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
@@ -81,7 +81,7 @@ impl<T: ITrait> BitAnd for Interval<T> {
 
         // Handle singletons first.
         if self.singleton() {
-            if rhs.contains(self.lower.unwrap()) {
+            if rhs.contains(self.lower()) {
                 return self;
             } else {
                 return Portion::empty();
@@ -122,7 +122,7 @@ impl<T: ITrait> BitAnd for Interval<T> {
 }
 
 // Union.
-impl<T: ITrait> BitOr for Interval<T> {
+impl<T: Item> BitOr for Interval<T> {
     type Output = Self;
 
     fn bitor(self, rhs: Interval<T>) -> Self::Output {
@@ -160,12 +160,12 @@ impl<T: ITrait> BitOr for Interval<T> {
 }
 
 // Complement.
-impl<T: ITrait> Neg for Interval<T> {
+impl<T: Item> Neg for Interval<T> {
     type Output = Intervals<T>;
 
     fn neg(self) -> Self::Output {
-        let left_lower = self.lower.unwrap().minn();
-        let left_upper = self.lower.unwrap();
+        let left_lower = self.lower().minimum();
+        let left_upper = self.lower();
         let left;
         if self.left_closed() {
             left = Portion::closedopen(left_lower, left_upper);
@@ -173,8 +173,8 @@ impl<T: ITrait> Neg for Interval<T> {
             left = Portion::closed(left_lower, left_upper);
         }
 
-        let right_lower = self.upper.unwrap();
-        let right_upper = self.upper.unwrap().maxx();
+        let right_lower = self.upper();
+        let right_upper = self.upper().maximum();
         let right;
         if self.right_closed() {
             right = Portion::openclosed(right_lower, right_upper);
@@ -183,30 +183,5 @@ impl<T: ITrait> Neg for Interval<T> {
         }
 
         Intervals::new(vec![left, right])
-    }
-}
-
-// Iterating.
-impl<T: ITrait> Iterator for Interval<T> {
-    type Item = T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.empty() {
-            return None;
-        }
-        if self.singleton() {
-            return self.lower.take();
-        }
-        let current = self.current.unwrap();
-        let next = Some(current.next());
-        if next < self.upper {
-            self.current = next;
-            return next;
-        }
-        if next == self.upper && self.right_closed() {
-            self.current = next;
-            return next;
-        }
-        None
     }
 }

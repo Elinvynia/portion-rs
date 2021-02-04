@@ -1,9 +1,10 @@
 // Helpers used in crate code.
 
-use crate::impls::ITrait;
-use crate::{Interval, IntervalType::*};
+use crate::impls::Item;
+use crate::interval::IntervalType::*;
+use crate::Interval;
 
-impl<T: ITrait> Interval<T> {
+impl<T: Item> Interval<T> {
     pub(crate) fn singleton(&self) -> bool {
         self.itype == Singleton
     }
@@ -42,7 +43,7 @@ impl<T: ITrait> Interval<T> {
 
         if self.left_closed() && other.left_open() {
             if self.lower > other.lower {
-                return LeftBound::Closed(self.lower.unwrap());
+                return LeftBound::Closed(self.lower());
             }
             return LeftBound::Open(other.lower.unwrap());
         }
@@ -51,7 +52,7 @@ impl<T: ITrait> Interval<T> {
             if other.lower > self.lower {
                 return LeftBound::Closed(other.lower.unwrap());
             }
-            return LeftBound::Open(self.lower.unwrap());
+            return LeftBound::Open(self.lower());
         }
 
         LeftBound::None
@@ -71,7 +72,7 @@ impl<T: ITrait> Interval<T> {
 
         if self.right_closed() && other.right_open() {
             if self.upper < other.upper {
-                return RightBound::Open(self.upper.unwrap());
+                return RightBound::Open(self.upper());
             }
             return RightBound::Closed(other.upper.unwrap());
         }
@@ -80,7 +81,7 @@ impl<T: ITrait> Interval<T> {
             if other.upper < self.upper {
                 return RightBound::Open(other.upper.unwrap());
             }
-            return RightBound::Closed(self.upper.unwrap());
+            return RightBound::Closed(self.upper());
         }
 
         RightBound::None
@@ -100,7 +101,7 @@ impl<T: ITrait> Interval<T> {
 
         if self.left_closed() && other.left_open() {
             if self.lower < other.lower {
-                return LeftBound::Closed(self.lower.unwrap());
+                return LeftBound::Closed(self.lower());
             }
             return LeftBound::Open(other.lower.unwrap());
         }
@@ -109,7 +110,7 @@ impl<T: ITrait> Interval<T> {
             if other.lower < self.lower {
                 return LeftBound::Closed(other.lower.unwrap());
             }
-            return LeftBound::Open(self.lower.unwrap());
+            return LeftBound::Open(self.lower());
         }
 
         if self.singleton() && other.singleton() {
@@ -119,7 +120,7 @@ impl<T: ITrait> Interval<T> {
 
         if self.singleton() {
             if self.lower <= other.lower {
-                return LeftBound::Closed(self.lower.unwrap());
+                return LeftBound::Closed(self.lower());
             }
             if other.left_closed() {
                 return LeftBound::Closed(other.lower.unwrap());
@@ -132,9 +133,9 @@ impl<T: ITrait> Interval<T> {
                 return LeftBound::Closed(other.lower.unwrap());
             }
             if self.left_closed() {
-                return LeftBound::Closed(self.lower.unwrap());
+                return LeftBound::Closed(self.lower());
             }
-            return LeftBound::Open(self.lower.unwrap());
+            return LeftBound::Open(self.lower());
         }
 
         LeftBound::None
@@ -154,14 +155,14 @@ impl<T: ITrait> Interval<T> {
 
         if self.right_closed() && other.right_open() {
             if self.upper >= other.upper {
-                return RightBound::Closed(self.upper.unwrap());
+                return RightBound::Closed(self.upper());
             }
             return RightBound::Open(other.upper.unwrap());
         }
 
         if self.right_open() && other.right_closed() {
             if self.upper > other.upper {
-                return RightBound::Open(self.upper.unwrap());
+                return RightBound::Open(self.upper());
             }
             return RightBound::Closed(other.upper.unwrap());
         }
@@ -173,7 +174,7 @@ impl<T: ITrait> Interval<T> {
 
         if self.singleton() {
             if self.lower >= other.upper {
-                return RightBound::Closed(self.lower.unwrap());
+                return RightBound::Closed(self.lower());
             }
             if other.right_closed() {
                 return RightBound::Closed(other.upper.unwrap());
@@ -186,22 +187,22 @@ impl<T: ITrait> Interval<T> {
                 return RightBound::Closed(other.lower.unwrap());
             }
             if self.right_closed() {
-                return RightBound::Closed(self.upper.unwrap());
+                return RightBound::Closed(self.upper());
             }
-            return RightBound::Open(self.upper.unwrap());
+            return RightBound::Open(self.upper());
         }
 
         RightBound::None
     }
 }
 
-pub(crate) enum LeftBound<T: ITrait> {
+pub(crate) enum LeftBound<T: Item> {
     Open(T),
     Closed(T),
     None,
 }
 
-pub(crate) enum RightBound<T: ITrait> {
+pub(crate) enum RightBound<T: Item> {
     Open(T),
     Closed(T),
     None,

@@ -15,51 +15,42 @@
 #![warn(missing_docs)]
 
 pub use interval::Interval;
-pub use ops::IntervalOps;
+pub use intervals::Intervals;
+pub use ops::Operations;
 
-use impls::ITrait;
+use crate::impls::Item;
+use crate::interval::IntervalType;
 use std::marker::PhantomData;
 
 pub(crate) mod helpers;
-pub mod holder;
 pub(crate) mod impls;
 pub mod interval;
+pub mod intervals;
 pub mod ops;
 
-#[derive(Eq, PartialEq, Copy, Clone)]
-pub(crate) enum IntervalType {
-    Open,
-    Closed,
-    Empty,
-    Singleton,
-    OpenClosed,
-    ClosedOpen,
-}
-
 /// Blank type used for interval creation.
-pub struct Portion<T: ITrait> {
+pub struct Portion<T: Item> {
     data: PhantomData<T>,
 }
 
-impl<T: ITrait> Portion<T> {
+impl<T: Item> Portion<T> {
     /// Creates an open interval.
     pub fn open(lower: T, upper: T) -> Interval<T> {
         Interval {
             lower: Some(lower),
             upper: Some(upper),
             itype: IntervalType::Open,
-            current: Some(lower),
+            current: None,
         }
     }
 
     /// Creates a closed interval.
     pub fn closed(lower: T, upper: T) -> Interval<T> {
-        let current = if lower == lower.minn() { lower } else { lower.prev() };
         Interval {
             lower: Some(lower),
             upper: Some(upper),
             itype: IntervalType::Closed,
-            current: Some(current),
+            current: None,
         }
     }
 
@@ -89,18 +80,17 @@ impl<T: ITrait> Portion<T> {
             lower: Some(lower),
             upper: Some(upper),
             itype: IntervalType::OpenClosed,
-            current: Some(lower),
+            current: None,
         }
     }
 
     /// Creates a closed-open interval.
     pub fn closedopen(lower: T, upper: T) -> Interval<T> {
-        let current = if lower == lower.minn() { lower } else { lower.prev() };
         Interval {
             lower: Some(lower),
             upper: Some(upper),
             itype: IntervalType::ClosedOpen,
-            current: Some(current),
+            current: None,
         }
     }
 }
