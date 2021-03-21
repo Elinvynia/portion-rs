@@ -32,6 +32,6 @@ fn closedopen() {
 
 #[test]
 fn empty() {
-     let x: Vec<u8> = Portion::empty().into_iter().collect();
-     assert_eq!(x, vec![]);
+    let x: Vec<u8> = Portion::empty().into_iter().collect();
+    assert_eq!(x, vec![]);
 }
