@@ -1,6 +1,7 @@
 //! Holds the interval type and associated methods.
 
 use crate::impls::Item;
+use crate::iter::IntoIter;
 use crate::ops::Operations;
 use std::fmt::Display;
 
@@ -9,16 +10,17 @@ pub struct Interval<T: Item> {
     pub(crate) lower: Option<T>,
     pub(crate) upper: Option<T>,
     pub(crate) itype: IntervalType,
-    pub(crate) current: Option<T>,
 }
 
 impl<T: Item> Interval<T> {
-    pub(crate) fn lower(&self) -> T {
-        self.lower.unwrap()
+    /// Iterator over references of this interval.
+    pub fn iter(&self) {
+        todo!()
     }
 
-    pub(crate) fn upper(&self) -> T {
-        self.upper.unwrap()
+    /// Iterator over mutable references of this interval.
+    pub fn iter_mut(&mut self) {
+        todo!()
     }
 }
 
@@ -57,37 +59,20 @@ impl<T: Item> Display for Interval<T> {
     }
 }
 
-impl<T: Item> Iterator for Interval<T> {
+impl<T: Item> IntoIterator for Interval<T> {
     type Item = T;
+    type IntoIter = IntoIter<T>;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.empty() {
-            return None;
-        }
-        if self.singleton() {
-            return self.lower.take();
-        }
+    fn into_iter(self) -> Self::IntoIter {
+        use IntervalType::*;
+        let current = match self.itype {
+            Open | OpenClosed => Some(self.lower().next()),
+            _ => self.lower,
+        };
 
-        if self.current.is_none() {
-            if self.left_closed() {
-                self.current = Some(self.lower());
-                return Some(self.lower());
-            }
-
-            self.current = Some(self.lower().next());
-            return Some(self.lower().next());
+        IntoIter {
+            current,
+            interval: self,
         }
-
-        let current = self.current.unwrap();
-        let next = Some(current.next());
-        if next < self.upper {
-            self.current = next;
-            return next;
-        }
-        if next == self.upper && self.right_closed() {
-            self.current = next;
-            return next;
-        }
-        None
     }
 }

@@ -5,6 +5,14 @@ use crate::interval::IntervalType::*;
 use crate::Interval;
 
 impl<T: Item> Interval<T> {
+    pub(crate) fn lower(&self) -> T {
+        self.lower.unwrap()
+    }
+
+    pub(crate) fn upper(&self) -> T {
+        self.upper.unwrap()
+    }
+
     pub(crate) fn singleton(&self) -> bool {
         self.itype == Singleton
     }
@@ -45,12 +53,12 @@ impl<T: Item> Interval<T> {
             if self.lower > other.lower {
                 return LeftBound::Closed(self.lower());
             }
-            return LeftBound::Open(other.lower.unwrap());
+            return LeftBound::Open(other.lower());
         }
 
         if self.left_open() && other.left_closed() {
             if other.lower > self.lower {
-                return LeftBound::Closed(other.lower.unwrap());
+                return LeftBound::Closed(other.lower());
             }
             return LeftBound::Open(self.lower());
         }
@@ -74,12 +82,12 @@ impl<T: Item> Interval<T> {
             if self.upper < other.upper {
                 return RightBound::Open(self.upper());
             }
-            return RightBound::Closed(other.upper.unwrap());
+            return RightBound::Closed(other.upper());
         }
 
         if self.right_open() && other.right_closed() {
             if other.upper < self.upper {
-                return RightBound::Open(other.upper.unwrap());
+                return RightBound::Open(other.upper());
             }
             return RightBound::Closed(self.upper());
         }
@@ -88,7 +96,7 @@ impl<T: Item> Interval<T> {
     }
 
     // Gets the lowest left point of two intervals.
-    pub(crate) fn get_left_val(&self, other: &Interval<T>) -> LeftBound<T> {
+    pub(crate) fn get_lowest_val(&self, other: &Interval<T>) -> LeftBound<T> {
         if self.left_open() && other.left_open() {
             let val = (self.lower).min(other.lower);
             return LeftBound::Open(val.unwrap());
@@ -103,12 +111,12 @@ impl<T: Item> Interval<T> {
             if self.lower < other.lower {
                 return LeftBound::Closed(self.lower());
             }
-            return LeftBound::Open(other.lower.unwrap());
+            return LeftBound::Open(other.lower());
         }
 
         if self.left_open() && other.left_closed() {
             if other.lower < self.lower {
-                return LeftBound::Closed(other.lower.unwrap());
+                return LeftBound::Closed(other.lower());
             }
             return LeftBound::Open(self.lower());
         }
@@ -123,14 +131,14 @@ impl<T: Item> Interval<T> {
                 return LeftBound::Closed(self.lower());
             }
             if other.left_closed() {
-                return LeftBound::Closed(other.lower.unwrap());
+                return LeftBound::Closed(other.lower());
             }
-            return LeftBound::Open(other.lower.unwrap());
+            return LeftBound::Open(other.lower());
         }
 
         if other.singleton() {
             if other.lower <= self.lower {
-                return LeftBound::Closed(other.lower.unwrap());
+                return LeftBound::Closed(other.lower());
             }
             if self.left_closed() {
                 return LeftBound::Closed(self.lower());
@@ -142,29 +150,33 @@ impl<T: Item> Interval<T> {
     }
 
     // Gets the highest right point of two intervals.
-    pub(crate) fn get_right_val(&self, other: &Interval<T>) -> RightBound<T> {
+    pub(crate) fn get_highest_val(&self, other: &Interval<T>) -> RightBound<T> {
+        // Both are open from the right.
         if self.right_open() && other.right_open() {
             let val = (self.upper).max(other.upper);
             return RightBound::Open(val.unwrap());
         }
 
+        // Both are closed from the right.
         if self.right_closed() && other.right_closed() {
             let val = (self.upper).max(other.upper);
             return RightBound::Closed(val.unwrap());
         }
 
+        // Closed and open
         if self.right_closed() && other.right_open() {
             if self.upper >= other.upper {
                 return RightBound::Closed(self.upper());
             }
-            return RightBound::Open(other.upper.unwrap());
+            return RightBound::Open(other.upper());
         }
 
+        // Open and closed
         if self.right_open() && other.right_closed() {
             if self.upper > other.upper {
                 return RightBound::Open(self.upper());
             }
-            return RightBound::Closed(other.upper.unwrap());
+            return RightBound::Closed(other.upper());
         }
 
         if self.singleton() && other.singleton() {
@@ -177,14 +189,14 @@ impl<T: Item> Interval<T> {
                 return RightBound::Closed(self.lower());
             }
             if other.right_closed() {
-                return RightBound::Closed(other.upper.unwrap());
+                return RightBound::Closed(other.upper());
             }
-            return RightBound::Open(other.upper.unwrap());
+            return RightBound::Open(other.upper());
         }
 
         if other.singleton() {
             if other.lower >= self.upper {
-                return RightBound::Closed(other.lower.unwrap());
+                return RightBound::Closed(other.lower());
             }
             if self.right_closed() {
                 return RightBound::Closed(self.upper());

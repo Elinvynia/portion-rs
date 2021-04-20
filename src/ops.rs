@@ -2,47 +2,37 @@
 
 use crate::helpers::{LeftBound, RightBound};
 use crate::impls::Item;
-use crate::intervals::Intervals;
 use crate::{Interval, IntervalType, Portion};
-use std::ops::{BitAnd, BitOr, Neg};
+use std::ops::{BitAnd, BitOr};
 
-/// Operations defined on intervals.
+/// Operations defined on interval-like things.
 pub trait Operations: Sized {
-    /// The interval type used in implementations.
-    type Single;
+    /// The return type used in implementations.
+    type Output;
 
-    /// Type for returning multiple intervals.
-    type Multiple;
-
-    /// Returns whether the interval(s) is empty, regardless of it's actual type.
+    /// Returns whether the interval is empty, regardless of it's actual type.
     fn empty(&self) -> bool {
         true
     }
 
-    /// Returns whether the interval(s) is atomic.
+    /// Returns whether the interval is atomic.
     fn atomic(&self) -> bool {
         true
     }
 
     /// Returns the intersection of two intervals, shorthand for `interval & interval`.
-    fn intersection(self, _other: Self::Single) -> Self::Single {
+    fn intersection(self, _other: Self::Output) -> Self::Output {
         unimplemented!()
     }
 
     /// Returns the union of two intervals, shorthand for `interval | interval`.
-    fn union(self, _other: Self::Single) -> Self::Single {
-        unimplemented!()
-    }
-
-    /// Returns the complement of the interval, shorthand for `-interval`
-    fn complement(self) -> Self::Multiple {
+    fn union(self, _other: Self::Output) -> Self::Output {
         unimplemented!()
     }
 }
 
 impl<T: Item> Operations for Interval<T> {
-    type Single = Self;
-    type Multiple = Intervals<T>;
+    type Output = Self;
 
     fn empty(&self) -> bool {
         use IntervalType::*;
@@ -56,16 +46,12 @@ impl<T: Item> Operations for Interval<T> {
         }
     }
 
-    fn intersection(self, other: Self::Single) -> Self::Single {
+    fn intersection(self, other: Self::Output) -> Self::Output {
         self & other
     }
 
-    fn union(self, other: Self::Single) -> Self::Single {
+    fn union(self, other: Self::Output) -> Self::Output {
         self | other
-    }
-
-    fn complement(self) -> Self::Multiple {
-        -self
     }
 }
 
@@ -140,8 +126,8 @@ impl<T: Item> BitOr for Interval<T> {
             return Portion::empty();
         }
 
-        let left_val = self.get_left_val(&rhs);
-        let right_val = self.get_right_val(&rhs);
+        let left_val = self.get_lowest_val(&rhs);
+        let right_val = self.get_highest_val(&rhs);
 
         match left_val {
             LeftBound::Closed(lower) => match right_val {
@@ -156,32 +142,5 @@ impl<T: Item> BitOr for Interval<T> {
             },
             LeftBound::None => unreachable!(),
         }
-    }
-}
-
-// Complement.
-impl<T: Item> Neg for Interval<T> {
-    type Output = Intervals<T>;
-
-    fn neg(self) -> Self::Output {
-        let left_lower = self.lower().minimum();
-        let left_upper = self.lower();
-        let left;
-        if self.left_closed() {
-            left = Portion::closedopen(left_lower, left_upper);
-        } else {
-            left = Portion::closed(left_lower, left_upper);
-        }
-
-        let right_lower = self.upper();
-        let right_upper = self.upper().maximum();
-        let right;
-        if self.right_closed() {
-            right = Portion::openclosed(right_lower, right_upper);
-        } else {
-            right = Portion::closed(right_lower, right_upper)
-        }
-
-        Intervals::new(vec![left, right])
     }
 }

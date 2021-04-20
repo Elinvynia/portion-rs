@@ -35,9 +35,3 @@ fn display_closedopen() {
     let x = Portion::closedopen(4, 9);
     assert_eq!("[4, 9)", x.to_string())
 }
-
-#[test]
-fn display_multiple() {
-    let x = Portion::closed(-2_i8, 2_i8);
-    assert_eq!("[-128, -2) | (2, 127]", (-x).to_string());
-}

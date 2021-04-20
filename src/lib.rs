@@ -15,7 +15,6 @@
 #![warn(missing_docs)]
 
 pub use interval::Interval;
-pub use intervals::Intervals;
 pub use ops::Operations;
 
 use crate::impls::Item;
@@ -25,7 +24,7 @@ use std::marker::PhantomData;
 pub(crate) mod helpers;
 pub(crate) mod impls;
 pub mod interval;
-pub mod intervals;
+pub(crate) mod iter;
 pub mod ops;
 
 /// Blank type used for interval creation.
@@ -40,7 +39,6 @@ impl<T: Item> Portion<T> {
             lower: Some(lower),
             upper: Some(upper),
             itype: IntervalType::Open,
-            current: None,
         }
     }
 
@@ -50,7 +48,6 @@ impl<T: Item> Portion<T> {
             lower: Some(lower),
             upper: Some(upper),
             itype: IntervalType::Closed,
-            current: None,
         }
     }
 
@@ -60,7 +57,6 @@ impl<T: Item> Portion<T> {
             lower: None,
             upper: None,
             itype: IntervalType::Empty,
-            current: None,
         }
     }
 
@@ -70,7 +66,6 @@ impl<T: Item> Portion<T> {
             lower: Some(value),
             upper: None,
             itype: IntervalType::Singleton,
-            current: None,
         }
     }
 
@@ -80,7 +75,6 @@ impl<T: Item> Portion<T> {
             lower: Some(lower),
             upper: Some(upper),
             itype: IntervalType::OpenClosed,
-            current: None,
         }
     }
 
@@ -90,7 +84,6 @@ impl<T: Item> Portion<T> {
             lower: Some(lower),
             upper: Some(upper),
             itype: IntervalType::ClosedOpen,
-            current: None,
         }
     }
 }

@@ -5,6 +5,10 @@ pub trait Item: Sized + Ord + Copy + Display {
         unimplemented!()
     }
 
+    fn next_ref(self) -> Self {
+        unimplemented!()
+    }
+
     fn prev(self) -> Self {
         unimplemented!()
     }
