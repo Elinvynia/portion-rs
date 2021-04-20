@@ -12,18 +12,6 @@ pub struct Interval<T: Item> {
     pub(crate) itype: IntervalType,
 }
 
-impl<T: Item> Interval<T> {
-    /// Iterator over references of this interval.
-    pub fn iter(&self) {
-        todo!()
-    }
-
-    /// Iterator over mutable references of this interval.
-    pub fn iter_mut(&mut self) {
-        todo!()
-    }
-}
-
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub(crate) enum IntervalType {
     Open,
